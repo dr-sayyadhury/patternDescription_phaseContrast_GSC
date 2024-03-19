@@ -15,7 +15,7 @@ library(forcats)
 ### FILE/FOLDER PATHS
 ###------------------------------------------------------------------#### 
 path_to_repo <- '/Users/mystique27m/Documents/research/PostdoctoralResearch_2020/Projects/PatternRecognitionInGSCs_UsingCV/'
-script_path <- paste0(path_to_repo,'scripts/')
+script_path <- paste0(path_to_repo,'scripts_final/code/')
 out <- paste0(path_to_repo,'out_intermediate/')
 figures_filepath <- paste0(path_to_repo, 'results/figures/')
 tables_path <-  paste0(path_to_repo,'results/tables/')
@@ -282,7 +282,7 @@ all(rownames(GSC.gsva_up)==rownames(pca_list_medPC_corGSVA[[1]]))
 df_high_combined$Group <- rep('high', nrow(df_high_combined))
 df_low_combined$Group <- rep('low', nrow(df_low_combined))
 df_hl_comb <- rbind(df_high_combined, df_low_combined)
-write.csv(df_hl_comb, paste0(results_path, 'df_top_bot_PC2_images_related_to_figure2E.csv'))
+write.csv(df_hl_comb, paste0(out, 'df_top_bot_PC2_images_related_to_figure2E.csv'))
 
 dplyr::count(df_hl_comb, Group, Sample) -> numbers
 

@@ -610,23 +610,23 @@ prepare_data_for_Analysis <- function(data_image_CSV){
 }
 
 ### Adding drug name to dataset ###
-drug_added_to_data <- function(dataset, druglist){
+#drug_added_to_data <- function(dataset, druglist){
   
-  drugs <- data.frame()
-  samples <- data.frame()
-  Well <- levels(factor(as.factor(dataset$Well)))
-  for (w in 1:length(Well)){
-    W <- Well[w]
-    subset_data <- subset(dataset, subset=Well==W)
-    n <- length(subset_data$Well)
-    dw <- subset(druglist, subset=Well==W)
-    d <- as.data.frame(lapply(dw[3], rep, n))
-    drugs <- rbind(drugs,d)
-    samples <- rbind(samples,subset_data)
-  }
-  names(drugs) <- 'Drug'
-  dataset <- cbind(drugs, samples)
-}
+#  drugs <- data.frame()
+#  samples <- data.frame()
+#  Well <- levels(factor(as.factor(dataset$Well)))
+#  for (w in 1:length(Well)){
+#    W <- Well[w]
+#    subset_data <- subset(dataset, subset=Well==W)
+#    n <- length(subset_data$Well)
+#    dw <- subset(druglist, subset=Well==W)
+#    d <- as.data.frame(lapply(dw[3], rep, n))
+#    drugs <- rbind(drugs,d)
+#    samples <- rbind(samples,subset_data)
+#  }
+#  names(drugs) <- 'Drug'
+#  dataset <- cbind(drugs, samples)
+#}
 
 sc_features <-
 c(

@@ -9,12 +9,9 @@ library(GSVA)
 ###------------------------------------------------------------------#### 
 ### directory paths
 path_to_repo <- '/Users/mystique27m/Documents/research/PostdoctoralResearch_2020/Projects/PatternRecognitionInGSCs_UsingCV/'
-script_path <- paste0(path_to_repo,'/scripts/')
+script_path <- paste0(path_to_repo,'scripts_final/code/')
 tables_path <-  paste0(path_to_repo,'/tables/')
 dir.create(tables_path)
-
-### file paths
-well_filepath <- paste0(path_to_repo,'datasets/wells_to_choose.csv') 
 
 ### read cellprofiler output
 ###------------------------------------------------------------------#### 

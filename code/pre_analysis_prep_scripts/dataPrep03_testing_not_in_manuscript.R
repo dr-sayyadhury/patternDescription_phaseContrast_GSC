@@ -16,7 +16,7 @@ library(forcats)
 ### FILE/FOLDER PATHS
 ###------------------------------------------------------------------#### 
 path_to_repo <- '/Users/mystique27m/Documents/research/PostdoctoralResearch_2020/Projects/PatternRecognitionInGSCs_UsingCV/'
-script_path <- paste0(path_to_repo,'/scripts/')
+script_path <- paste0(path_to_repo,'/scripts_final/code/')
 
 phase <- read.csv(paste0(path_to_repo, '/datasets/image_cp/final_dataset_afterQC.csv'), row.names = 1)
 GSC.gsva <- read.csv(paste0(path_to_repo,'/datasets/bulk_RNA/GSC.gsva.csv'), row.names=1)
@@ -46,10 +46,6 @@ for (l in 1:n){
 }
 
 
-### -------------------------------------------------------------------------###
-### === Supplementary figure xx
-### -------------------------------------------------------------------------###
-
 #PLOT GRANULARITY AND HARALICK FEATURE VECTORS SEPARATELY AND SHOW THEIR VARIATIONS ACROSS IMAGE TIMEPOINTS
 t <- phaseN[phaseN$TimePt %in% 'T_0',] %>% as.data.frame(.)
 max_confluency <- t %>% group_by(Sample) %>% summarize(.,mean(Area))
@@ -65,30 +61,4 @@ phaseN[is.na(phaseN)] <- 0
 
 shorter_short <- shorter[22:34] %>%  gsub('_00', '', .)
 
-
-g_list <- list()
-cols <- sequential_hcl(palette='Inferno', n=200, rev=T)
-cols <- cols[90:100]
-for (t in 1:length(shorter_short)){
-  texture <- shorter_short[t]
-  txt_fam <- phaseN[ startsWith(colnames(phaseN), texture)] %>% cor(.) %>% as.data.frame(.)
-  #txt_fam <- phaseN[,grep(texture, colnames(phaseN))] %>% cor(.) %>% as.data.frame(.)
-  print(paste0(texture,' - min:',min(txt_fam)))
-  
-  txt_fam$txt <- rownames(txt_fam)
-  melt_txt <- reshape2::melt(txt_fam, id_var=txt)
-  g_l <- ggplot(melt_txt, aes(txt, reorder(value, variable), color=variable)) +
-   geom_point(size=6) +
-    theme(axis.text=element_text(size=9))
-  g_list[[t]] <- g_l
-  }
-
-ggarrange(plotlist=g_list, ncol=4, nrow=4)
-
-#calculated by sample
-
-
-### Figure end -----------------------------------------------------------------
-#-------------------------------------------------------------------------------
-
-
+rm(list=ls())

@@ -10,42 +10,35 @@ library(ggrepel)
 library(effectsize)
 library(ggthemes)
 
-
-
 ### FILE/FOLDER PATHS
 ###------------------------------------------------------------------#### 
 ### directory paths
 path_to_repo <- '/Users/mystique27m/Documents/research/PostdoctoralResearch_2020/Projects/PatternRecognitionInGSCs_UsingCV/'
+dataset_path <- paste0(path_to_repo,'datasets/')
+script_path <- paste0(path_to_repo,'scripts_final/code/')
+well_filepath <- paste0(dataset_path,'wells_to_choose.csv') 
 
-dataset_path <- paste0(path_to_repo, 'datasets/image_cp/original_output_see_dataPrep01_in_scripts/') ### to run and download again
-script_path <- paste0(path_to_repo,'/scripts/')
-
-### file paths
-well_filepath <- paste0(path_to_repo,'datasets/wells_to_choose.csv') 
-
-
-### source data 
+### LOAD DATA load data
 ###------------------------------------------------------------------#### 
 source(paste0(script_path,"source_scripts/sourceData_General_variables_and_functions.R"))
 
-### Original data
 ###------------------------------------------------------------------#### 
 # read cellprofiler results
-G523 <- read.csv(paste0(dataset_path,"/G523_mediaOnly_fullDatasetImage.csv"))
-G549 <- read.csv(paste0(dataset_path,"/G549_mediaOnly_fullDatasetImage.csv"))
-G564 <- read.csv(paste0(dataset_path,"/G564_mediaOnly_fullDatasetImage.csv"))
-G566 <- read.csv(paste0(dataset_path,"/G566_mediaOnly_fullDatasetImage.csv"))
-G583 <- read.csv(paste0(dataset_path,"/G583_mediaOnly_fullDatasetImage.csv"))
-G729 <- read.csv(paste0(dataset_path,"/G729_mediaOnly_fullDatasetImage.csv"))
-G797 <- read.csv(paste0(dataset_path,"/G797_mediaOnly_fullDatasetImage.csv"))
-G799 <- read.csv(paste0(dataset_path,"/G799_mediaOnly_fullDatasetImage.csv"))
-G800 <- read.csv(paste0(dataset_path,"/G800_mediaOnly_fullDatasetImage.csv"))
-G837 <- read.csv(paste0(dataset_path,"/G837_mediaOnly_fullDatasetImage.csv"))
-G861 <- read.csv(paste0(dataset_path,"/G861_mediaOnly_fullDatasetImage.csv"))
-G876 <- read.csv(paste0(dataset_path,"/G876_mediaOnly_fullDatasetImage.csv"))
-G851 <- read.csv(paste0(dataset_path,"/G851_mediaOnly_fullDatasetImage.csv"))
-G885 <- read.csv(paste0(dataset_path,"/G885_mediaOnly_fullDatasetImage.csv"))
-G895 <- read.csv(paste0(dataset_path,"/G895_mediaOnly_fullDatasetImage.csv"))
+G523 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G523_mediaOnly_fullDatasetImage.csv"))
+G549 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G549_mediaOnly_fullDatasetImage.csv"))
+G564 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G564_mediaOnly_fullDatasetImage.csv"))
+G566 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G566_mediaOnly_fullDatasetImage.csv"))
+G583 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G583_mediaOnly_fullDatasetImage.csv"))
+G729 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G729_mediaOnly_fullDatasetImage.csv"))
+G797 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G797_mediaOnly_fullDatasetImage.csv"))
+G799 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G799_mediaOnly_fullDatasetImage.csv"))
+G800 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G800_mediaOnly_fullDatasetImage.csv"))
+G837 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G837_mediaOnly_fullDatasetImage.csv"))
+G861 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G861_mediaOnly_fullDatasetImage.csv"))
+G876 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G876_mediaOnly_fullDatasetImage.csv"))
+G851 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G851_mediaOnly_fullDatasetImage.csv"))
+G885 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G885_mediaOnly_fullDatasetImage.csv"))
+G895 <- read.csv(paste0(dataset_path,"image_cp/original_output_fromCellProfiler/G895_mediaOnly_fullDatasetImage.csv"))
 
 # read drug list
 wells <- read.csv(well_filepath)
@@ -103,13 +96,11 @@ colnames(df_mask) <- c('Drug', colnames(final_df$maskRaw))
 
 ### raw data
 df_raw <- final_df$raw
-df_raw <- drug_added_to_data(df_raw, wells)
 
 df_mask <- df_mask %>% group_by(Sample) %>% 
   arrange(Sample, group_by=T) %>% 
   mutate(TimePt=factor(TimePt, levels=timePt_levels)) %>%
   as.data.frame(.)
-
 
 ### QC from masked Raw images
 qc_maskRaw <- final_df$QC_maskRaw
@@ -120,11 +111,6 @@ qc_maskRaw <- qc_maskRaw %>% group_by(Sample) %>%
 
 ### we remove images that are of low quality using the power log spectrum as described in materials & methods
 ### we then plot the quality of each image by patient sample and remove the low quality images with low pplog values 
-
-
-### -------------------------------------------------------------------------###
-### === Supplementary figure 2A
-### -------------------------------------------------------------------------###
 
 ###REMOVE LOW QUALITY IMAGES USING RAW UNMASKED IMAGES
 ### QC from Raw images

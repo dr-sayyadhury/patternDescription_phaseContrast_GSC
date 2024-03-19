@@ -17,7 +17,7 @@ library(forcats)
 ### FILE/FOLDER PATHS
 ###------------------------------------------------------------------#### 
 path_to_repo <- '/Users/mystique27m/Documents/research/PostdoctoralResearch_2020/Projects/PatternRecognitionInGSCs_UsingCV/'
-script_path <- paste0(path_to_repo,'scripts/')
+script_path <- paste0(path_to_repo,'scripts_final/code/')
 out <- paste0(path_to_repo,'out_intermediate/')
 figures_filepath <- paste0(path_to_repo, 'results/figures/')
 tables_path <-  paste0(path_to_repo,'results/tables/')
@@ -26,7 +26,7 @@ tables_path <-  paste0(path_to_repo,'results/tables/')
 ### LOAD DATA
 ###------------------------------------------------------------------#### 
 #source(paste0(script_path,"/script04b_.R"))
-source(paste0(script_path,"/sourceData_General_variables_and_functions.R"))
+source(paste0(script_path,"source_scripts/sourceData_General_variables_and_functions.R"))
 GSC.gsva <- read.csv(paste0(path_to_repo,'/results/GSC.gsva.csv'), row.names=1)
 load(paste0(path_to_repo, '/results/feature_correlations.Rdata'))
 

@@ -17,7 +17,7 @@ library(forcats)
 ### FILE/FOLDER PATHS
 ###------------------------------------------------------------------#### 
 path_to_repo <- '/Users/mystique27m/Documents/research/PostdoctoralResearch_2020/Projects/PatternRecognitionInGSCs_UsingCV/'
-script_path <- paste0(path_to_repo,'/scripts/')
+script_path <- paste0(path_to_repo,'scripts_final/code/')
 out <- paste0(path_to_repo,'out_intermediate/')
 dir.create(out)
 figures_filepath <- paste0(path_to_repo, 'results/figures/')
@@ -106,10 +106,11 @@ for (l in 1:length(df_list_tp_subsetted)){
   write.csv(df_list_tp_subsetted[[l]], paste0(new_path, l, '.csv'))
 }
 
-
 #### save nromalized data and proceed with actual biological analysis
-saveRDS(df_list_tp_subsetted, paste0(new_path, '/df_list_tp_subsetted.rds'))
-
+saveRDS(df_list_tp_subsetted, paste0(out, '/df_list_tp_subsetted.rds'))
 
 remove(list=ls())
+
+
+
 

@@ -17,7 +17,7 @@ library(PCAtools) ### note this version 2.6.0 requires a downgrade in matrixStat
 ### FILE/FOLDER PATHS
 ###------------------------------------------------------------------#### 
 path_to_repo <- '/Users/mystique27m/Documents/research/PostdoctoralResearch_2020/Projects/PatternRecognitionInGSCs_UsingCV/'
-script_path <- paste0(path_to_repo,'/scripts/')
+script_path <- paste0(path_to_repo,'scripts_final/code/')
 out <- paste0(path_to_repo,'out_intermediate/')
 dir.create(out)
 figures_filepath <- paste0(path_to_repo, 'results/figures/')
@@ -382,8 +382,7 @@ pca_list[[9]] <- d
 
 
 ### to be re-used in next script.
-saveRDS(pca_list, paste0(results_path, 'pca_output_of_wholeImages_by_congrps.rds'))
-
+saveRDS(pca_list, paste0(out, 'pca_output_of_wholeImages_by_congrps.rds'))
 remove(list=c('pca_list_medPC_corGSVA','pca_list_medPC_corGSVA_pvalue', 'pca_loadings_list'))
 
 
@@ -478,7 +477,7 @@ write.csv(pc3_loadings, paste0(tables_path, "/S_Table3/Tbl_3_pc3_wholeImageLoadi
 #--------------------------------------------------------------------------------#
 ### Table end
 
-save(pca_list, pca_list_medPC_corGSVA, pca_list_medPC_corGSVA_pvalue, pc1_loadings, pc2_loadings, pc3_loadings, file=paste0(path_to_repo, '/results/feature_correlations.Rdata'))
+save(pca_list, pca_list_medPC_corGSVA, pca_list_medPC_corGSVA_pvalue, pc1_loadings, pc2_loadings, pc3_loadings, file=paste0(out, '/feature_correlations.Rdata'))
 remove(list=ls())
 
 
