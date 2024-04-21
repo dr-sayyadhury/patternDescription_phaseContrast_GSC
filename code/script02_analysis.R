@@ -22,6 +22,8 @@ out <- paste0(path_to_repo,'out_intermediate/')
 dir.create(out)
 figures_filepath <- paste0(path_to_repo, 'results/figures/')
 dir.create(figures_filepath)
+tables_path <-  paste0(path_to_repo,'/tables/')
+
 
 ### LOAD DATA
 ###------------------------------------------------------------------####
@@ -52,6 +54,8 @@ for (i in 1:9){
     df <- apply(df, 2, FUN=function(x)if(mean(x)==0)
     {x=x}
     else{x/max(x)}) %>% as.data.frame(.) ### note keep this
+    
+    df$InfoMeas1_00 <- df$InfoMeas1_00 * -1
     df <- apply(df,1, standardize)
     df <- cbind(meta,t(df)) 
     df <- df %>% .[order(.$TimePt),]
@@ -102,7 +106,7 @@ for (i in 1:9){
   var <- sort(which((p$variance[1:length(pcs)-1]-p$variance[2:(length(pcs))]) > 0.1), decreasing=T)[1]
   minPC <- min(pc1, var)
   
-  sc[[i]] <- PCAtools::screeplot(p, colBar='darkblue', axisLabSize = 9, components = 1:(pc1+1), title = '')
+  sc[[i]] <- PCAtools::screeplot(p, colBar='darkblue', axisLabSize = 21, components = 1:(pc1+1), title = '')
   pca_df <- cbind(meta,p$rotated)
   colnames(pca_df) <- c('con_grp','Media','Sample','TimePt','Well','Area', paste0('PC', 1:ncol(p$rotated)))
   var_pc <- rbind(var_pc, (p$variance[1] + p$variance[2]))
@@ -131,10 +135,10 @@ for (i in 1:9){
     theme_minimal() +
     scale_color_manual(values=c(cols_vivid, col_bold)) +
     theme(legend.position = 'none', 
-          axis.title = element_text(size=12),
+          axis.title = element_text(size=18),
           axis.line = element_line(color='black'),
           axis.text.x = element_blank(),
-          axis.text.y = element_text(angle=45, size=9)) +
+          axis.text.y = element_text(angle=45, size=12)) +
     #geom_text_repel(aes(label=Sample), size=2.5) +
     xlab("PC2") + ylab("PC1")
   
@@ -169,7 +173,6 @@ dev.off()
 
 g1 <- list()
 
-
 for (p in 1:9){
   
   pca_df <- pca_list[[p]] %>% as.data.frame()
@@ -180,10 +183,11 @@ for (p in 1:9){
     theme_minimal() +
     scale_color_manual(values=c(cols_vivid, col_bold)) +
     theme(legend.position = 'none', 
-          axis.title = element_text(size=12),
+          axis.title.y = element_blank(),
+          axis.title.x = element_text(size=21),
           axis.line = element_line(color='black'),
           axis.text.x = element_blank(),
-          axis.text.y = element_text(angle=45, size=9)) +
+          axis.text.y = element_text(angle=45, size=18)) +
     #geom_text_repel(aes(label=Sample), size=2.5) +
     xlab("PC1") + ylab("Sample")
   
@@ -203,7 +207,6 @@ dev.off()
 
 g2 <- list()
 
-
 for (p in 1:9){
   
   pca_df <- pca_list[[p]] %>% as.data.frame()
@@ -214,12 +217,14 @@ for (p in 1:9){
     theme_minimal() +
     scale_color_manual(values=c(cols_vivid, col_bold)) +
     theme(legend.position = 'none', 
-          axis.title = element_text(size=12),
+          axis.title.y = element_blank(),
+          axis.title.x = element_text(size=21),
           axis.line = element_line(color='black'),
           axis.text.x = element_blank(),
-          axis.text.y = element_text(angle=45, size=9)) +
+          axis.text.y = element_text(angle=45, size=18)) +
     #geom_text_repel(aes(label=Sample), size=2.5) +
-    xlab("PC2") + ylab("Sample")
+    xlab("PC1") + ylab("Sample")
+  
   
 }
 
@@ -251,15 +256,15 @@ GSC.gsva <- GSC.gsva
 sig <- rownames(GSC.gsva)
 
 for (pc in 1:14){
-  final_correlation_medPC <- as.data.frame(matrix(nrow=113))
-  final_correlation_medPC_pvalue <- as.data.frame(matrix(nrow=113))
+  final_correlation_medPC <- as.data.frame(matrix(nrow=111))
+  final_correlation_medPC_pvalue <- as.data.frame(matrix(nrow=111))
   
   for (con in 1:9){
     df <- pca_df_summary[[con]] ### select confluency group
     to_plot1 <- df[pc+1] %>% as.data.frame(.) ### select PC to focus on for the rest of the analysis
     gsva_short <- t(GSC.gsva) %>% as.data.frame(.) %>% .[df$Sample,]
     final_col <- data.frame()  
-    for (x in 1:113){
+    for (x in 1:111){
       ctype <- sig[x] ### then select the cell types to focus
       #gsva_short <- gsva_short[,ctype]
       g <- gsva_short[,colnames(gsva_short) %in% ctype]
@@ -325,36 +330,25 @@ for (hm in 1:9){
   )
   dev.off()
 }
-###------------------------------------------------------------------####
-### FIGURE END
-
-
-
 
 
 # CHANGE THE direction for easy comparison across confluency groups
+
 ### PC1
-d <- pca_list[[5]]
+d <- pca_list[[3]]
 d$PC1 <- (d$PC1)*(-1)
-pca_list[[5]] <- d
-
-d <- pca_list[[6]]
-d$PC1 <- (d$PC1)*(-1)
-pca_list[[6]] <- d
-
-d <- pca_list[[7]]
-d$PC1 <- (d$PC1)*(-1)
-pca_list[[7]] <- d
+pca_list[[3]] <- d
 
 d <- pca_list[[8]]
 d$PC1 <- (d$PC1)*(-1)
 pca_list[[8]] <- d
 
-d <- pca_list[[9]]
-d$PC1 <- (d$PC1)*(-1)
-pca_list[[9]] <- d
 
-### PC2
+### PC2 , C1,C2,C4, C7, C9
+
+d <- pca_list[[1]]
+d$PC2 <- (d$PC2)*(-1)
+pca_list[[1]] <- d
 
 d <- pca_list[[2]]
 d$PC2 <- (d$PC2)*(-1)
@@ -368,14 +362,13 @@ d <- pca_list[[4]]
 d$PC2 <- (d$PC2)*(-1)
 pca_list[[4]] <- d
 
-d <- pca_list[[6]]
+d <- pca_list[[7]]
 d$PC2 <- (d$PC2)*(-1)
-pca_list[[6]] <- d
+pca_list[[7]] <- d
 
 d <- pca_list[[9]]
 d$PC2 <- (d$PC2)*(-1)
 pca_list[[9]] <- d
-
 
 
 ### repeat correlations
@@ -386,7 +379,6 @@ saveRDS(pca_list, paste0(out, 'pca_output_of_wholeImages_by_congrps.rds'))
 remove(list=c('pca_list_medPC_corGSVA','pca_list_medPC_corGSVA_pvalue', 'pca_loadings_list'))
 
 
-### BEFORE CHANGING PC DIRECTIONS
 #CALCULATE MEAN PC SCORES BY SAMPLE FOR ALL CONFLUENCY GROUPS
 pca_df_summary <- list()
 for (l in 1:9){
@@ -404,15 +396,15 @@ GSC.gsva <- GSC.gsva
 sig <- rownames(GSC.gsva)
 
 for (pc in 1:14){
-  final_correlation_medPC <- as.data.frame(matrix(nrow=113))
-  final_correlation_medPC_pvalue <- as.data.frame(matrix(nrow=113))
+  final_correlation_medPC <- as.data.frame(matrix(nrow=111))
+  final_correlation_medPC_pvalue <- as.data.frame(matrix(nrow=111))
   
   for (con in 1:9){
     df <- pca_df_summary[[con]] ### select confluency group
     to_plot1 <- df[pc+1] %>% as.data.frame(.) ### select PC to focus on for the rest of the analysis
     gsva_short <- t(GSC.gsva) %>% as.data.frame(.) %>% .[df$Sample,]
     final_col <- data.frame()  
-    for (x in 1:113){
+    for (x in 1:111){
       ctype <- sig[x] ### then select the cell types to focus
       #gsva_short <- gsva_short[,ctype]
       g <- gsva_short[,colnames(gsva_short) %in% ctype]
@@ -431,12 +423,11 @@ for (pc in 1:14){
     final_correlation_medPC_pvalue <- cbind(final_correlation_medPC_pvalue, final_col[3])
   }
   final_correlation_medPC <- final_correlation_medPC[2:10]
-  colnames(final_correlation_medPC) <- c(paste0('pixelBio', 1:9))
-  
+  colnames(final_correlation_medPC) <- c(paste0('C', 1:9))
   pca_list_medPC_corGSVA[[pc]] <- final_correlation_medPC
   
   final_correlation_medPC_pvalue <- final_correlation_medPC_pvalue[2:10]
-  colnames(final_correlation_medPC_pvalue) <- paste0('pixelBio', 1:9)
+  colnames(final_correlation_medPC_pvalue) <- paste0('C', 1:9)
   pca_list_medPC_corGSVA_pvalue[[pc]] <- final_correlation_medPC_pvalue 
   
 }
@@ -444,34 +435,88 @@ for (pc in 1:14){
 colnames(pc1_loadings) <- colnames(pc2_loadings) <- colnames(pc3_loadings) <- c('Texture',paste0("C", 1:9)) 
 
 
-pc1_loadings$C5 <- pc1_loadings$C5 * (-1)
-pc1_loadings$C6 <- pc1_loadings$C6 * (-1)
-pc1_loadings$C7 <- pc1_loadings$C7 * (-1)
+pc1_loadings$C3 <- pc1_loadings$C3 * (-1)
 pc1_loadings$C8 <- pc1_loadings$C8 * (-1)
-pc1_loadings$C9 <- pc1_loadings$C9 * (-1)
 
+pc2_loadings$C1 <- pc2_loadings$C1 * (-1)
 pc2_loadings$C2 <- pc2_loadings$C2 * (-1)
 pc2_loadings$C3 <- pc2_loadings$C3 * (-1)
 pc2_loadings$C4 <- pc2_loadings$C4 * (-1)
-pc2_loadings$C6 <- pc2_loadings$C6 * (-1)
+pc2_loadings$C7 <- pc2_loadings$C7 * (-1)
 pc2_loadings$C9 <- pc2_loadings$C9 * (-1)
 
 
-dir.create(paste0(tables_path, 'S_Table2'))
+dir.create(paste0(path_to_repo, 'results/tables/S_Table2'))
+new_table_path <- paste0(path_to_repo, 'results/tables/S_Table2/')
 
-dir.create(paste0(tables_path, '/S_Table2'))
-new_table_path <- paste0(tables_path, '/S_Table2/correlation_gsvaScoresWholeImages_PC')
+
+### save workbook
+library(openxlsx)
+
+
+wb <- createWorkbook()
 
 for (cor in 1:14){
-  write.csv(pca_list_medPC_corGSVA[[cor]], paste0(new_table_path, cor, ".csv"))  
+  addWorksheet(wb, sheetName = paste0('PC', cor))
+  writeData(wb, sheet = paste0('PC', cor), pca_list_medPC_corGSVA[[cor]], rowNames = TRUE)
 }
 
-dir.create(paste0(tables_path, 'S_Table3'))
+saveWorkbook(wb, paste0(new_table_path, 'sT2_correlation_gsva_imagefeatures.xlsx'), overwrite = TRUE)
 
-### These are compiled into Table 1
-write.csv(pc1_loadings, paste0(tables_path, "/S_Table3/Tbl_3_pc1_wholeImageLoadings.csv"))
-write.csv(pc2_loadings, paste0(tables_path, "/S_Table3/Tbl_3_pc2_wholeImageLoadings.csv"))
-write.csv(pc3_loadings, paste0(tables_path, "/S_Table3/Tbl_3_pc3_wholeImageLoadings.csv"))
+
+dir.create(paste0(path_to_repo, 'results/tables/S_Table3'))
+new_table_path <- paste0(path_to_repo, 'results/tables/S_Table3/')
+
+wb <- createWorkbook()
+addWorksheet(wb, sheetName = 'pc1_loadings')
+writeData(wb, sheet = 'pc1_loadings', pc1_loadings, rowNames = TRUE)
+
+addWorksheet(wb, sheetName = 'pc2_loadings')
+writeData(wb, sheet = 'pc2_loadings', pc2_loadings, rowNames = TRUE)
+
+saveWorkbook(wb, paste0(new_table_path, 'sT3_pc1_pc2_wholeImageLoadings.xlsx'), overwrite = TRUE)
+
+
+if(dir.exists(paste0(figures_filepath,'Sup_Fig_S3'))==F){
+  dir.create(paste0(figures_filepath,'Sup_Fig_S3'))}
+
+
+## See if we change the signs - materials and methods
+#TO CHECK THE CONGRUENCY BETWEEN CONFLUENCY GROUPS
+hm_col <- sequential_hcl(45, palette='Inferno', rev=T)
+hm_col_neg<- sequential_hcl(45, palette='GnBu')
+
+for (hm in 1:9){
+  data <- pca_list_medPC_corGSVA[[hm]]
+  #colours <- data$col
+  #names(colours) <- data
+  meta <- paste0('C', 1:9)
+  data.cor <- cor(data)
+  rownames(data.cor) <- colnames(data.cor) <- meta
+
+
+  ###------------------------------------------------------------------####
+  ### FIGURE S3B
+  ###------------------------------------------------------------------####
+  pdf(paste0(figures_filepath, 'Sup_fig_S3/S3_B', hm, '.pdf'), width=6.6, height=6)
+  pheatmap::pheatmap(data.cor, 
+                     #annotation_col = meta, 
+                     #annotation_colors = list(cell_type_group=colours), 
+                     show_rownames = T, 
+                     annotation_legend = F,
+                     legend = T,
+                     border_color = NA, 
+                     cluster_cols =F,
+                     cluster_rows = F,
+                     fontsize = 21,
+                     color = hm_col
+  )
+  dev.off()
+}
+ ###------------------------------------------------------------------####
+### FIGURE END
+
+  
 
 
 #--------------------------------------------------------------------------------#
@@ -479,5 +524,7 @@ write.csv(pc3_loadings, paste0(tables_path, "/S_Table3/Tbl_3_pc3_wholeImageLoadi
 
 save(pca_list, pca_list_medPC_corGSVA, pca_list_medPC_corGSVA_pvalue, pc1_loadings, pc2_loadings, pc3_loadings, file=paste0(out, '/feature_correlations.Rdata'))
 remove(list=ls())
+
+
 
 

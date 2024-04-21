@@ -85,7 +85,8 @@ for (i in 1:length(df_list_tp_subsetted)){
               axis.title.x = element_text(size=18),
               axis.title.y = element_text(size=18), 
               legend.position='none') + 
-        labs(x='Sample', y='Area')
+        ylim(0, 1.1) +
+        labs(x='Sample', y='Area') 
 }
 
 

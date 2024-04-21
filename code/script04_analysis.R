@@ -1,5 +1,3 @@
-
-
 ### PACKAGES TO LOAD
 ###------------------------------------------------------------------#### 
 library(ggplot2)  
@@ -22,13 +20,12 @@ out <- paste0(path_to_repo,'out_intermediate/')
 figures_filepath <- paste0(path_to_repo, 'results/figures/')
 tables_path <-  paste0(path_to_repo,'results/tables/')
 
-
 ### LOAD DATA
 ###------------------------------------------------------------------#### 
 #source(paste0(script_path,"/script04b_.R"))
 source(paste0(script_path,"source_scripts/sourceData_General_variables_and_functions.R"))
 GSC.gsva <- read.csv(paste0(path_to_repo,'/results/GSC.gsva.csv'), row.names=1)
-load(paste0(path_to_repo, '/results/feature_correlations.Rdata'))
+load(paste0(out, '/feature_correlations.Rdata'))
 
 rownames(pc2_loadings) <- gsub('_00', '', pc2_loadings$Texture)
 
@@ -65,6 +62,7 @@ for (i in 1:9){
     
     colnames(df) <- c('con_grp', shorter)
     new_df <- rbind(new_df, df)
+    new_df$InfoMeas1_00 <- new_df$InfoMeas1_00 * -1
     
   }
   new_df_list[[i]] <- new_df
@@ -87,28 +85,29 @@ correlation <- c('InfoMeas1_00','InfoMeas2_00')
 pdf(paste0(figures_filepath, 'Sup_Fig_S4/S4_A.pdf'),  width=9.5, height=7.5)
 ggline(new_df_list_comb_grn, x='con_grp', y='value', color='variable', add='mean_sd') +
   scale_color_manual(values=sequential_hcl('viridis', n=16)) +
-  theme(legend.position = 'right')
+  theme(legend.position = 'right',
+  legend.text = element_text(size=12),
+  legend.title = element_blank())
 dev.off()
 ###------------------------------------------------------------------####
 ### FIG END
 
 
-ggplot(new_df_list_comb_grn, aes())
-
-if(dir.exists(paste0(figures_filepath,'Sup_Fig_S5'))==F){
-  dir.create(paste0(figures_filepath,'Sup_Fig_S5'))}
 
 new_df_list_comb_txt <- new_df_list_comb[c(1:6,23:35)]
 new_df_list_comb_txt <- reshape2::melt(new_df_list_comb_txt, id.vars=colnames(new_df_list_comb_txt[1:6]))
 
 ###------------------------------------------------------------------####
-### SUPPLEMENTARY FIG 5A
+### SUPPLEMENTARY FIG 4
 ###------------------------------------------------------------------####
-pdf(paste0(figures_filepath, 'Sup_Fig_S5/S5_A.pdf'),  width=9.5, height=7.5)
+pdf(paste0(figures_filepath, 'Sup_Fig_S4/S4_B.pdf'),  width=9.5, height=7.5)
 ggline(new_df_list_comb_txt, x='con_grp', y='value', color='variable', add='mean_sd') +
   scale_color_manual(values=cols_vivid) +
-  theme(legend.position = 'right')
+  theme(legend.position = 'right',
+  legend.text = element_text(size=12),
+  legend.title = element_blank())
 dev.off()
+
 ###------------------------------------------------------------------####
 ### FIG END
 
@@ -118,180 +117,506 @@ new_df_list_comb_txt_rm_infomeas1 <- subset(new_df_list_comb_txt, variable!='Inf
 ###------------------------------------------------------------------####
 ### SUPPLEMENTARY FIG 5B
 ###------------------------------------------------------------------####
-pdf(paste0(figures_filepath, 'Sup_Fig_S5/S5_B.pdf'), width=9.5, height=7.5)
+pdf(paste0(figures_filepath, 'Sup_Fig_S4/S4_C.pdf'), width=9.5, height=7.5)
 ggline(new_df_list_comb_txt_rm_infomeas1, x='con_grp', y='value', color='variable', add='mean_sd') +
   scale_color_manual(values=cols_vivid) +
-  theme(legend.position = 'right')
+  theme(legend.position = 'right',
+  legend.text = element_text(size=12),
+  legend.title = element_blank())
 dev.off()
 ###------------------------------------------------------------------####
 ### FIG END
 
 
 pc2_loadings_melt <- reshape2::melt(pc2_loadings, id.vars='Texture')
-
 max(pc2_loadings_melt$value)
 steps_pos <- floor(max(pc2_loadings_melt$value)/0.05)
-
 min(pc2_loadings_melt$value)
 steps_neg <- floor(min(pc2_loadings_melt$value)/0.05)*(-1)
+cols <- c(sequential_hcl('Magenta', n=steps_pos*3, rev=F), sequential_hcl('Mako', n=steps_neg*3, rev=T))
 
 
 if(dir.exists(paste0(figures_filepath,'Figure_3'))==F){
   dir.create(paste0(figures_filepath,'Figure_3'))}
 
-cols <- c(sequential_hcl('Magenta', n=steps_pos*3, rev=F), sequential_hcl('Mako', n=steps_neg*3, rev=T))
 
 ###------------------------------------------------------------------####
 ### FIGURE 3A
 ###------------------------------------------------------------------####
-pdf(paste0(figures_filepath, 'Figure_3/Fig3_A.pdf'), width=13.5, height=3.5)
-pheatmap::pheatmap(t(pc2_loadings[2:10]),
+
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_A.pdf'), width=4.0, height=12)
+pheatmap::pheatmap((pc2_loadings[2:10]),
                    cluster_rows = F,
                    cluster_cols = F, 
                    color = rev(cols),
                    fontsize = 9,
-                   angle_col = 45,
-                   cellwidth = 30,
-                   cellheight = 15,
+                   angle_row = 45,
+                   cellwidth = 15,
+                   cellheight = 27,
                    border_color = NA)
 dev.off()
 ###------------------------------------------------------------------####
 ### FIG END
+sample_cols <- c(
+'#ebac23', #yellow
+'#b80058', #lipstick
+#'#008cf9', #azure
+#'#ff9287', #coral
+'#56641a', #fern frond
+'#c0affb', #perfume
+'#e6a176', #apricot
+'#00678a', #orient
+'#984464', #vin rouge
+'#5eccab', #downy
+'#cdcdcd', #gray
+'#274d52', #plantation
+'#c7a2a6', #eunry
+'#818b70', #battleship
+'#604e3c', #kabul
+'#8c9fb7', #bali hai
+'#796880') #rum
+
 
 
 cols_blues <- sequential_hcl('Mako', n=9, rev=T) ### low PC2
 cols_mag <- sequential_hcl('Magenta', n=9, rev=T) ### PC2
-
-
-glist <- list()
-for (c in 1:9){
-  cgroups <- levels(factor(pca_list_com$con_grp))
-  df <- pca_list_com[pca_list_com$con_grp==cgroups[c],]
-  glist[[c]] <- ggplot(df, aes(reorder(Sample,PC2), Angular2ndMoment_00, fill=con_grp)) +
-    geom_violin(color='darkred', fill=cols_mag[c]) +
-    theme_minimal() +
-    theme(legend.position = 'none', 
-          axis.title = element_blank())
-  
-}
-
-###------------------------------------------------------------------####
-### FIGURE 3B1
-###------------------------------------------------------------------####
-pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_ang.pdf'), width=6, height=12)
-ggarrange(plotlist = glist, nrow=9)
+cols_neutral <- sequential_hcl('Grays', n=9, rev=T) ### high PC2
+#sample_cols <- divergingx_hcl('Zissou 1', n=15)
+all_sample_means <- aggregate(PC2 ~ Sample, data = pca_list_com, mean) %>% arrange(PC2)
+all_sample_means$Sample <- factor(all_sample_means$Sample, levels=all_sample_means$Sample)
+all_sample_means$colors <- sample_cols
+### plot tje colors from all sample means and label with the color name
+df_cols <- as.data.frame(all_sample_means)
+df_cols$scale <- 3
+rownames(df_cols) <- df_cols$Sample
+#df <- data.frame(sample=all_sample_means$Sample, scale=3)
+df_cols
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_B_sample_colors.pdf'), width=9, height=1)
+ggplot(df_cols, aes(x=Sample, y=scale, fill=Sample)) +
+  geom_tile() +
+  scale_fill_manual(values=df_cols$colors) +
+  theme_minimal() +
+  theme(legend.position = 'none',
+        axis.title = element_blank(),
+        axis.text.x = element_text(angle=90, size=18),
+        axis.text.y = element_blank())
 dev.off()
+
 ###------------------------------------------------------------------####
-### FIG END
+### Supplementary figure 5A - low confluency
+###------------------------------------------------------------------####
 
-
-### InfoMeas (low Pc2)
+### Neurodevelopmental samples
 pca_list_com <- do.call(rbind, pca_list)
-cols_blues <- sequential_hcl('Mako', n=9, rev=T)
+### granularity 3
 glist <- list()
 for (c in 1:9){
   cgroups <- levels(factor(pca_list_com$con_grp))
-  df <- pca_list_com[pca_list_com$con_grp==cgroups[c],]
-  glist[[c]] <- ggplot(df, aes(reorder(Sample,PC2), InfoMeas1_00, fill=con_grp)) +
-            geom_violin(color='darkblue', fill=cols_blues[c]) +
-    theme_minimal() +
-    theme(legend.position = 'none', 
-          axis.title = element_blank())
+  df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
+
+  sample_means <- aggregate(Granularity_3 ~ Sample, data = df, mean)
+  pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+
+  #cor <- cor.test(df$Granularity_3, df$PC2)
+  cor <- cor.test(sample_means$Granularity_3, pc2_means$PC2)
+  p_value <- cor$p.value %>% round(.,6)
+  r <- (cor$estimate) %>% round(., 3)
+ # 'D' for darker shades, similar to 'Mako'
   
+  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+  # Create a ggplot
+  glist[[c]] <- ggplot() +
+    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = Granularity_3, color=Sample), size=0.3) +
+    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = Sample, y = Granularity_3, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    scale_color_manual(values=sample_cols) +
+    annotate("text", x = Inf, y = Inf, 
+         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+         hjust = 1.1, vjust = 1.1, size = 6) +
+    theme_minimal() +
+    theme(
+  legend.position = 'right', 
+  legend.text = element_text(size=9),
+  legend.title = element_blank(),
+  legend.spacing.y = unit(0.1, 'cm'),  # Reduced spacing
+  legend.key.height = unit(0.1, 'cm'),  # Smaller keys
+  axis.title = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size=12)
+) +   
+    guides(color = guide_legend(override.aes = list(size = 3))) +
+    guides(fill = guide_legend(byrow = TRUE)) +
+
+
+    ylim((min(df$Granularity_3)), (max(df$Granularity_3)+0.15))
+
 }
 
-###------------------------------------------------------------------####
-### FIGURE 3B2
-pdf(paste0(figures_filepath, 'Figure_3/Fig3_B2_infomeas1.pdf'), width=6, height=12)
-ggarrange(plotlist = glist, nrow=9)
-dev.off()
-###------------------------------------------------------------------####
-### FIG END
 
+### FIGURE 3B ###
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_grn3.pdf'), width = 4.5, height = 18)
+ggarrange(plotlist = glist, nrow = 9)
+dev.off()
+
+
+
+###------------------------------------------------------------------####
+### Supplementary figure 5B - low confluency
+###------------------------------------------------------------------####
+
+### Neurodevelopmental samples
+### Neurodevelopmental samples
+pca_list_com <- do.call(rbind, pca_list)
+### granularity 3
 glist <- list()
 for (c in 1:9){
   cgroups <- levels(factor(pca_list_com$con_grp))
-  df <- pca_list_com[pca_list_com$con_grp==cgroups[c],]
-  glist[[c]] <- ggplot(df, aes(reorder(Sample,PC2), Granularity_16, fill=con_grp)) +
-    geom_violin(color='darkblue', fill=cols_blues[c]) +
-    theme_minimal() +
-    theme(legend.position = 'none', 
-          axis.title = element_blank())
+  df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
+
+  sample_means <- aggregate(Granularity_8 ~ Sample, data = df, mean)
+  pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+
+  #cor <- cor.test(df$Granularity_3, df$PC2)
+  cor <- cor.test(sample_means$Granularity_8, pc2_means$PC2)
+  p_value <- cor$p.value %>% round(.,6)
+  r <- (cor$estimate) %>% round(., 3)
+ # 'D' for darker shades, similar to 'Mako'
   
+  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+  # Create a ggplot
+  glist[[c]] <- ggplot() +
+    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = Granularity_8, color=Sample), size=0.3) +
+    geom_line(data = sample_means, aes(x = Sample, y = Granularity_8, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    scale_color_manual(values=sample_cols) +
+    annotate("text", x = Inf, y = Inf, 
+         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+         hjust = 1.1, vjust = 1.1, size = 6) +
+    theme_minimal() +
+    theme(
+  legend.position = 'right', 
+  legend.text = element_text(size=9),
+  legend.title = element_blank(),
+  legend.spacing.y = unit(0.1, 'cm'),  # Reduced spacing
+  legend.key.height = unit(0.1, 'cm'),  # Smaller keys
+  axis.title = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size=12)
+) +   
+    guides(color = guide_legend(override.aes = list(size = 3))) +
+    guides(fill = guide_legend(byrow = TRUE)) +
+
+
+    ylim((min(df$Granularity_8)), (max(df$Granularity_8)+0.15))
+
 }
 
-###------------------------------------------------------------------####
-### FIGURE 3C2
-###------------------------------------------------------------------####
-pdf(paste0(figures_filepath, 'Figure_3/Fig3_C2_grn16.pdf'), width=6, height=12)
-ggarrange(plotlist = glist, nrow=9)
+
+### FIGURE 3B ###
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_grn8.pdf'), width = 4.5, height = 18)
+ggarrange(plotlist = glist, nrow = 9)
 dev.off()
+
 ###------------------------------------------------------------------####
-### FIG END
+### Supplementary figure 5C - low confluency
+###------------------------------------------------------------------####
 
-
+### Neurodevelopmental samples
+### Neurodevelopmental samples
+pca_list_com <- do.call(rbind, pca_list)
+### granularity 3
 glist <- list()
 for (c in 1:9){
   cgroups <- levels(factor(pca_list_com$con_grp))
-  df <- pca_list_com[pca_list_com$con_grp==cgroups[c],]
-  glist[[c]] <- ggplot(df, aes(reorder(Sample,PC2), Correlation_00, fill=con_grp)) +
-    geom_violin(color='darkred', fill=cols_mag[c]) +
-    theme_minimal() +
-    theme(legend.position = 'none', 
-          axis.title = element_blank())
+  df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
+
+  sample_means <- aggregate(InfoMeas1_00 ~ Sample, data = df, mean)
+  pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+
+  #cor <- cor.test(df$Granularity_3, df$PC2)
+  cor <- cor.test(sample_means$InfoMeas1_00, pc2_means$PC2)
+  p_value <- cor$p.value %>% round(.,6)
+  r <- (cor$estimate) %>% round(., 3)
+ # 'D' for darker shades, similar to 'Mako'
   
+  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+  # Create a ggplot
+  glist[[c]] <- ggplot() +
+    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = InfoMeas1_00, color=Sample), size=0.3) +
+    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = Sample, y = InfoMeas1_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    scale_color_manual(values=sample_cols) +
+    annotate("text", x = Inf, y = Inf, 
+         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+         hjust = 1.1, vjust = 1.1, size = 6) +
+    theme_minimal() +
+    theme(
+  legend.position = 'right', 
+  legend.text = element_text(size=9),
+  legend.title = element_blank(),
+  legend.spacing.y = unit(0.1, 'cm'),  # Reduced spacing
+  legend.key.height = unit(0.1, 'cm'),  # Smaller keys
+  axis.title = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size=12)
+) +   
+    guides(color = guide_legend(override.aes = list(size = 3))) +
+    guides(fill = guide_legend(byrow = TRUE)) +
+
+
+    ylim((min(df$InfoMeas1_00)), (max(df$InfoMeas1_00)+0.15))
+
 }
 
-###------------------------------------------------------------------####
-### FIGURE 3C1
-###------------------------------------------------------------------####
-pdf(paste0(figures_filepath, 'Figure_3/Fig3_C1_correlation.pdf'), width=6, height=12)
-ggarrange(plotlist = glist, nrow=9)
-dev.off()
-###------------------------------------------------------------------####
-### FIG END
 
+### FIGURE 3B ###
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_IMC1.pdf'), width = 4.5, height = 18)
+ggarrange(plotlist = glist, nrow = 9)
+dev.off()
+
+
+###------------------------------------------------------------------####
+### Figure 3 - low confluency
+###------------------------------------------------------------------####
+
+### Neurodevelopmental samples
+pca_list_com <- do.call(rbind, pca_list)
+### granularity 3
 glist <- list()
 for (c in 1:9){
   cgroups <- levels(factor(pca_list_com$con_grp))
-  df <- pca_list_com[pca_list_com$con_grp==cgroups[c],]
-  glist[[c]] <- ggplot(df, aes(reorder(Sample,PC2), DifferenceVariance_00, fill=con_grp)) +
-    geom_violin(color='darkred', fill=cols_mag[c]) +
-    theme_minimal() +
-    theme(legend.position = 'none', 
-          axis.title = element_blank())
+  df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
+
+  sample_means <- aggregate(InfoMeas2_00 ~ Sample, data = df, mean)
+  pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+
+  #cor <- cor.test(df$Granularity_3, df$PC2)
+  cor <- cor.test(sample_means$InfoMeas2_00, pc2_means$PC2)
+  p_value <- cor$p.value %>% round(.,6)
+  r <- (cor$estimate) %>% round(., 3)
+ # 'D' for darker shades, similar to 'Mako'
   
+  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+  # Create a ggplot
+  glist[[c]] <- ggplot() +
+    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = InfoMeas2_00, color=Sample), size=0.3) +
+    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = Sample, y = InfoMeas2_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    scale_color_manual(values=sample_cols) +
+    annotate("text", x = Inf, y = Inf, 
+         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+         hjust = 1.1, vjust = 1.1, size = 6) +
+    theme_minimal() +
+    theme(
+  legend.position = 'right', 
+  legend.text = element_text(size=9),
+  legend.title = element_blank(),
+  legend.spacing.y = unit(0.1, 'cm'),  # Reduced spacing
+  legend.key.height = unit(0.1, 'cm'),  # Smaller keys
+  axis.title = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size=12)
+) +   
+    guides(color = guide_legend(override.aes = list(size = 3))) +
+    guides(fill = guide_legend(byrow = TRUE)) +
+
+
+    ylim((min(df$InfoMeas2_00)), (max(df$InfoMeas2_00)+0.15))
+
 }
 
-###------------------------------------------------------------------####
-### FIGURE 3D1
-###------------------------------------------------------------------####
-pdf(paste0(figures_filepath, 'Sup_Fig_S5/S5_D_diffV.pdf'), width=6, height=12)
-ggarrange(plotlist = glist, nrow=9)
-dev.off()
-###------------------------------------------------------------------####
-### FIG END
 
+### FIGURE 3B ###
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_IMC2.pdf'), width = 4.5, height = 18)
+ggarrange(plotlist = glist, nrow = 9)
+dev.off()
+
+
+###------------------------------------------------------------------####
+### Figure 3 - low confluency
+###------------------------------------------------------------------####
+
+### Neurodevelopmental samples
+pca_list_com <- do.call(rbind, pca_list)
+### granularity 3
 glist <- list()
 for (c in 1:9){
   cgroups <- levels(factor(pca_list_com$con_grp))
-  df <- pca_list_com[pca_list_com$con_grp==cgroups[c],]
-  glist[[c]] <- ggplot(df, aes(reorder(Sample,PC2), Contrast_00, fill=con_grp)) +
-    geom_violin(color='darkred', fill=cols_mag[c]) +
-    theme_minimal() +
-    theme(legend.position = 'none', 
-          axis.title = element_blank())
+  df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
+
+  sample_means <- aggregate(InverseDifferenceMoment_00 ~ Sample, data = df, mean)
+  pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+
+  #cor <- cor.test(df$Granularity_3, df$PC2)
+  cor <- cor.test(sample_means$InverseDifferenceMoment_00, pc2_means$PC2)
+  p_value <- cor$p.value %>% round(.,6)
+  r <- (cor$estimate) %>% round(., 3)
+ # 'D' for darker shades, similar to 'Mako'
   
+  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+  # Create a ggplot
+  glist[[c]] <- ggplot() +
+    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = InverseDifferenceMoment_00, color=Sample), size=0.3) +
+    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = Sample, y = InverseDifferenceMoment_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    scale_color_manual(values=sample_cols) +
+    annotate("text", x = Inf, y = Inf, 
+         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+         hjust = 1.1, vjust = 1.1, size = 6) +
+    theme_minimal() +
+    theme(
+  legend.position = 'right', 
+  legend.text = element_text(size=9),
+  legend.title = element_blank(),
+  legend.spacing.y = unit(0.1, 'cm'),  # Reduced spacing
+  legend.key.height = unit(0.1, 'cm'),  # Smaller keys
+  axis.title = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size=12)
+) +   
+    guides(color = guide_legend(override.aes = list(size = 3))) +
+    guides(fill = guide_legend(byrow = TRUE)) +
+
+
+    ylim((min(df$InverseDifferenceMoment_00)), (max(df$InverseDifferenceMoment_00)+0.15))
+
 }
 
-###------------------------------------------------------------------####
-### FIGURE 3D2
-###------------------------------------------------------------------####
-pdf(paste0(figures_filepath, 'Sup_Fig_S5/S5_D_contrast.pdf'), width=6, height=12)
-ggarrange(plotlist = glist, nrow=9)
+
+
+### FIGURE 3B ###
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_InverseDiffMom.pdf'), width = 4.5, height = 18)
+ggarrange(plotlist = glist, nrow = 9)
 dev.off()
+
+
+
+### Neurodevelopmental samples
+pca_list_com <- do.call(rbind, pca_list)
+### granularity 3
+glist <- list()
+for (c in 1:9){
+  cgroups <- levels(factor(pca_list_com$con_grp))
+  df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
+
+  sample_means <- aggregate(Angular2ndMoment_00 ~ Sample, data = df, mean)
+  pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+
+  #cor <- cor.test(df$Granularity_3, df$PC2)
+  cor <- cor.test(sample_means$Angular2ndMoment_00, pc2_means$PC2)
+  p_value <- cor$p.value %>% round(.,6)
+  r <- (cor$estimate) %>% round(., 3)
+ # 'D' for darker shades, similar to 'Mako'
+  
+  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+  # Create a ggplot
+  glist[[c]] <- ggplot() +
+    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = Angular2ndMoment_00, color=Sample), size=0.3) +
+    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = Sample, y = Angular2ndMoment_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    scale_color_manual(values=sample_cols) +
+    annotate("text", x = Inf, y = Inf, 
+         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+         hjust = 1.1, vjust = 1.1, size = 6) +
+    theme_minimal() +
+    theme(
+  legend.position = 'right', 
+  legend.text = element_text(size=9),
+  legend.title = element_blank(),
+  legend.spacing.y = unit(0.1, 'cm'),  # Reduced spacing
+  legend.key.height = unit(0.1, 'cm'),  # Smaller keys
+  axis.title = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size=12)
+) +   
+    guides(color = guide_legend(override.aes = list(size = 3))) +
+    guides(fill = guide_legend(byrow = TRUE)) +
+
+
+    ylim((min(df$Angular2ndMoment_00)), (max(df$Angular2ndMoment_00)+0.15))
+
+}
+
+
+
+### FIGURE 3B ###
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_Ang2ndMom.pdf'), width = 4.5, height = 18)
+ggarrange(plotlist = glist, nrow = 9)
+dev.off()
+
+
+
+
 ###------------------------------------------------------------------####
-### FIG END
+### Figure 3 - low confluency
+###------------------------------------------------------------------####
+
+### Neurodevelopmental samples
+pca_list_com <- do.call(rbind, pca_list)
+### granularity 3
+glist <- list()
+for (c in 1:9){
+  cgroups <- levels(factor(pca_list_com$con_grp))
+  df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
+
+  sample_means <- aggregate(Correlation_00 ~ Sample, data = df, mean)
+  pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+
+  #cor <- cor.test(df$Granularity_3, df$PC2)
+  cor <- cor.test(sample_means$Correlation_00, pc2_means$PC2)
+  p_value <- cor$p.value %>% round(.,6)
+  r <- (cor$estimate) %>% round(., 3)
+ # 'D' for darker shades, similar to 'Mako'
+  
+  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+  # Create a ggplot
+  glist[[c]] <- ggplot() +
+    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = Correlation_00, color=Sample), size=0.3) +
+    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = Sample, y = Correlation_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    scale_color_manual(values=sample_cols) +
+    annotate("text", x = Inf, y = Inf, 
+         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+         hjust = 1.1, vjust = 1.1, size = 6) +
+    theme_minimal() +
+    theme(
+  legend.position = 'right', 
+  legend.text = element_text(size=9),
+  legend.title = element_blank(),
+  legend.spacing.y = unit(0.1, 'cm'),  # Reduced spacing
+  legend.key.height = unit(0.1, 'cm'),  # Smaller keys
+  axis.title = element_blank(),
+  axis.text.x = element_blank(),
+  axis.text.y = element_text(size=12)
+) +   
+    guides(color = guide_legend(override.aes = list(size = 3))) +
+    guides(fill = guide_legend(byrow = TRUE)) +
+
+
+    ylim((min(df$Correlation_00)), (max(df$Correlation_00)+0.15))
+
+}
+
+
+
+
+### FIGURE 3B ###
+pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_correlation.pdf'), width = 4.5, height = 18)
+ggarrange(plotlist = glist, nrow = 9)
+dev.off()
+
+
+
+
+
+
+
 
 
 high_pc2 <-  subset(pca_list_com, Sample %in% c('G876', 'G895', 'G799'))[c(1:6,8,36:64)]
@@ -349,4 +674,9 @@ ggline(pc2_topbot_3_txt_hom, x='con_grp', y='value', color='pc2_dir', add='mean_
 dev.off()
 ###------------------------------------------------------------------####
 ### FIG END
+
+
+
+
+
 

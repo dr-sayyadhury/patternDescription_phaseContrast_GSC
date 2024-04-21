@@ -26,7 +26,7 @@ tables_path <-  paste0(path_to_repo,'results/tables/')
 #source(paste0(script_path,"/script04b_.R"))
 source(paste0(script_path,"source_scripts/sourceData_General_variables_and_functions.R"))
 GSC.gsva <- read.csv(paste0(path_to_repo,'/results/GSC.gsva.csv'), row.names=1)
-load(paste0(path_to_repo, '/results/feature_correlations.Rdata'))
+load(paste0(out, 'feature_correlations.Rdata'))
 
 
 if(dir.exists(paste0(figures_filepath,'Figure_2'))==F){
@@ -63,6 +63,22 @@ for (hm in 1:2){
   ###------------------------------------------------------------------###
   # FIG END
 
+  pdf(paste0(figures_filepath, 'Figure_2/Fig2_A_PC_labeled_', hm, '.pdf'), width=4.5, height=18)
+  heatmap_ <- pheatmap::pheatmap(data, 
+                     #annotation_row = meta, 
+                     #annotation_colors = list(cell_type_group=colours), 
+                     show_rownames = T, 
+                     annotation_legend = F,
+                     legend = T,
+                     border_color = NA, 
+                     cluster_cols =F,
+                     cluster_rows = T,
+                     fontsize = 12,
+                     color = hm_col
+  )
+  dev.off()
+  ###------------------------------------------------------------------###
+  # FIG END
 
 
   new_df <- pca_list_medPC_corGSVA[[hm]]
@@ -119,8 +135,8 @@ ggplot(pc1_cor_melt, aes(x=reorder(sig, correlation), y=correlation, group=con_g
         legend.position = 'none') +
 #  geom_hline(yintercept=0) +
   geom_vline(xintercept = 0) +
-  xlab('gene signatures') +
-  ylab('correlation score')
+  xlab('Gene signatures') +
+  ylab('Correlation score')
 dev.off()
 ###------------------------------------------------------------------###
 # FIG END
@@ -174,8 +190,8 @@ ggplot(pc2_cor_melt, aes(x=reorder(sig, correlation), y=correlation, group=con_g
         legend.position = 'none') +
 #  geom_hline(yintercept=0) +
   geom_vline(xintercept = 0) +
-  xlab('gene signatures') +
-  ylab('correlation score')
+  xlab('Gene signatures') +
+  ylab('Correlation score')
 dev.off()
 ###------------------------------------------------------------------###
 # FIG END
@@ -307,3 +323,5 @@ dev.off()
 
 
 remove(list=ls())
+
+
