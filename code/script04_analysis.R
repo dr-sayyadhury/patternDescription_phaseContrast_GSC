@@ -178,21 +178,21 @@ sample_cols <- c(
 
 
 
-cols_blues <- sequential_hcl('Mako', n=9, rev=T) ### low PC2
-cols_mag <- sequential_hcl('Magenta', n=9, rev=T) ### PC2
-cols_neutral <- sequential_hcl('Grays', n=9, rev=T) ### high PC2
+#cols_blues <- sequential_hcl('Mako', n=9, rev=T) ### low PC2
+#cols_mag <- sequential_hcl('Magenta', n=9, rev=T) ### PC2
+#cols_neutral <- sequential_hcl('Grays', n=9, rev=T) ### high PC2
 #sample_cols <- divergingx_hcl('Zissou 1', n=15)
-all_sample_means <- aggregate(PC2 ~ Sample, data = pca_list_com, mean) %>% arrange(PC2)
-all_sample_means$Sample <- factor(all_sample_means$Sample, levels=all_sample_means$Sample)
-all_sample_means$colors <- sample_cols
+#all_sample_means <- aggregate(PC2 ~ Sample, data = pca_list_com, mean) %>% arrange(PC2)
+#all_sample_means$Sample <- factor(all_sample_means$Sample, levels=all_sample_means$Sample)
+all_sample_cols <- data.frame(Sample=unique(pca_list_com$Sample), colors=sample_cols)
+rownames(all_sample_cols) <- all_sample_cols$Sample
 ### plot tje colors from all sample means and label with the color name
-df_cols <- as.data.frame(all_sample_means)
-df_cols$scale <- 3
-rownames(df_cols) <- df_cols$Sample
-#df <- data.frame(sample=all_sample_means$Sample, scale=3)
-df_cols
+all_sample_cols$scale <- 3
+colors <- all_sample_cols$colors
+names(colors) <- all_sample_cols$Sample
+
 pdf(paste0(figures_filepath, 'Figure_3/Fig3_B_sample_colors.pdf'), width=9, height=1)
-ggplot(df_cols, aes(x=Sample, y=scale, fill=Sample)) +
+ggplot(all_sample_cols, aes(x=Sample, y=scale, fill=Sample)) +
   geom_tile() +
   scale_fill_manual(values=df_cols$colors) +
   theme_minimal() +
@@ -208,6 +208,7 @@ dev.off()
 
 ### Neurodevelopmental samples
 pca_list_com <- do.call(rbind, pca_list)
+
 ### granularity 3
 glist <- list()
 for (c in 1:9){
@@ -216,24 +217,43 @@ for (c in 1:9){
 
   sample_means <- aggregate(Granularity_3 ~ Sample, data = df, mean)
   pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+  if (all(sample_means$Sample==pc2_means$Sample)==T){
+    sample_means$PC2 <- pc2_means$PC2
+  }
 
-  #cor <- cor.test(df$Granularity_3, df$PC2)
-  cor <- cor.test(sample_means$Granularity_3, pc2_means$PC2)
+  sample_means <- sample_means[order(sample_means$PC2),]
+ 
+  cols <- all_sample_cols[sample_means$Sample,]
+  cols <- cols[sample_means$Sample,]
+  cols$PC2 <- sample_means$PC2
+  cols <- cols[order(cols$PC2),]
+
+  cor <- cor.test(sample_means$Granularity_3, sample_means$PC2)
   p_value <- cor$p.value %>% round(.,6)
   r <- (cor$estimate) %>% round(., 3)
- # 'D' for darker shades, similar to 'Mako'
-  
-  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+
+if (p_value < 0.001) {
+  p <- '***'  # Assign '***' for p-values less than 0.001
+} else if (p_value < 0.01) {
+  p <- '**'   # Assign '**' for p-values less than 0.01
+} else {
+  p <- ''     # No asterisks for p-values 0.01 or higher
+}
+
+
 
   # Create a ggplot
   glist[[c]] <- ggplot() +
-    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = Granularity_3, color=Sample), size=0.3) +
-    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = reorder(Sample, PC2), y = Granularity_3, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    geom_jitter(data = df, aes(x = Sample, y = Granularity_3, color=Sample), size=0.3) +
     geom_line(data = sample_means, aes(x = Sample, y = Granularity_3, group=1), color = 'black', size = 0.9) +  # Line connecting means
-    scale_color_manual(values=sample_cols) +
+    scale_color_manual(values=colors, breaks = sample_means$Sample) +
     annotate("text", x = Inf, y = Inf, 
-         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
-         hjust = 1.1, vjust = 1.1, size = 6) +
+         label =  p, 
+         #label = formatC(p_value, format = "f", digits = 3),
+         #label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "f", digits = 3)), 
+         hjust = 1.1, vjust = 1.1, size = 6, color='red') +
     theme_minimal() +
     theme(
   legend.position = 'right', 
@@ -247,11 +267,10 @@ for (c in 1:9){
 ) +   
     guides(color = guide_legend(override.aes = list(size = 3))) +
     guides(fill = guide_legend(byrow = TRUE)) +
-
-
     ylim((min(df$Granularity_3)), (max(df$Granularity_3)+0.15))
 
 }
+
 
 
 ### FIGURE 3B ###
@@ -265,9 +284,7 @@ dev.off()
 ### Supplementary figure 5B - low confluency
 ###------------------------------------------------------------------####
 
-### Neurodevelopmental samples
-### Neurodevelopmental samples
-pca_list_com <- do.call(rbind, pca_list)
+
 ### granularity 3
 glist <- list()
 for (c in 1:9){
@@ -276,23 +293,42 @@ for (c in 1:9){
 
   sample_means <- aggregate(Granularity_8 ~ Sample, data = df, mean)
   pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+  if (all(sample_means$Sample==pc2_means$Sample)==T){
+    sample_means$PC2 <- pc2_means$PC2
+  }
 
-  #cor <- cor.test(df$Granularity_3, df$PC2)
-  cor <- cor.test(sample_means$Granularity_8, pc2_means$PC2)
-  p_value <- cor$p.value %>% round(.,6)
+  sample_means <- sample_means[order(sample_means$PC2),]
+ 
+  cols <- all_sample_cols[sample_means$Sample,]
+  cols <- cols[sample_means$Sample,]
+  cols$PC2 <- sample_means$PC2
+  cols <- cols[order(cols$PC2),]
+
+  cor <- cor.test(sample_means$Granularity_8, sample_means$PC2)
+  p_value <- cor$p.value
   r <- (cor$estimate) %>% round(., 3)
- # 'D' for darker shades, similar to 'Mako'
-  
-  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+
+if (p_value < 0.001) {
+  p <- '***'  # Assign '***' for p-values less than 0.001
+} else if (p_value < 0.01) {
+  p <- '**'   # Assign '**' for p-values less than 0.01
+} else {
+  p <- ''     # No asterisks for p-values 0.01 or higher
+}
+
+
 
   # Create a ggplot
   glist[[c]] <- ggplot() +
-    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = Granularity_8, color=Sample), size=0.3) +
+    geom_line(data = sample_means, aes(x = reorder(Sample, PC2), y = Granularity_8, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    geom_jitter(data = df, aes(x = Sample, y = Granularity_8, color=Sample), size=0.3) +
     geom_line(data = sample_means, aes(x = Sample, y = Granularity_8, group=1), color = 'black', size = 0.9) +  # Line connecting means
-    scale_color_manual(values=sample_cols) +
+    scale_color_manual(values=colors, breaks = sample_means$Sample) +
     annotate("text", x = Inf, y = Inf, 
-         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
-         hjust = 1.1, vjust = 1.1, size = 6) +
+         label =  p, 
+        #label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+        hjust = 1.1, vjust = 1.1, size = 9, color='red') +
     theme_minimal() +
     theme(
   legend.position = 'right', 
@@ -324,7 +360,7 @@ dev.off()
 
 ### Neurodevelopmental samples
 ### Neurodevelopmental samples
-pca_list_com <- do.call(rbind, pca_list)
+
 ### granularity 3
 glist <- list()
 for (c in 1:9){
@@ -333,24 +369,39 @@ for (c in 1:9){
 
   sample_means <- aggregate(InfoMeas1_00 ~ Sample, data = df, mean)
   pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+  if (all(sample_means$Sample==pc2_means$Sample)==T){
+    sample_means$PC2 <- pc2_means$PC2
+  }
 
-  #cor <- cor.test(df$Granularity_3, df$PC2)
-  cor <- cor.test(sample_means$InfoMeas1_00, pc2_means$PC2)
+  sample_means <- sample_means[order(sample_means$PC2),]
+ 
+  cols <- all_sample_cols[sample_means$Sample,]
+  cols <- cols[sample_means$Sample,]
+  cols$PC2 <- sample_means$PC2
+  cols <- cols[order(cols$PC2),]
+
+  cor <- cor.test(sample_means$InfoMeas1_00, sample_means$PC2)
   p_value <- cor$p.value %>% round(.,6)
   r <- (cor$estimate) %>% round(., 3)
- # 'D' for darker shades, similar to 'Mako'
-  
-  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+if (p_value < 0.001) {
+  p <- '***'  # Assign '***' for p-values less than 0.001
+} else if (p_value < 0.01) {
+  p <- '**'   # Assign '**' for p-values less than 0.01
+} else {
+  p <- ''     # No asterisks for p-values 0.01 or higher
+}
 
   # Create a ggplot
   glist[[c]] <- ggplot() +
-    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = InfoMeas1_00, color=Sample), size=0.3) +
-    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = reorder(Sample, PC2), y = InfoMeas1_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    geom_jitter(data = df, aes(x = Sample, y = InfoMeas1_00, color=Sample), size=0.3) +
     geom_line(data = sample_means, aes(x = Sample, y = InfoMeas1_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
-    scale_color_manual(values=sample_cols) +
+    scale_color_manual(values=colors, breaks = sample_means$Sample) +
     annotate("text", x = Inf, y = Inf, 
-         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
-         hjust = 1.1, vjust = 1.1, size = 6) +
+         label =  p, 
+        #label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
+        hjust = 1.1, vjust = 1.1, size = 9, color='red') +
     theme_minimal() +
     theme(
   legend.position = 'right', 
@@ -381,34 +432,47 @@ dev.off()
 ### Figure 3 - low confluency
 ###------------------------------------------------------------------####
 
-### Neurodevelopmental samples
-pca_list_com <- do.call(rbind, pca_list)
-### granularity 3
 glist <- list()
+### Neurodevelopmental samplesglist <- list()
 for (c in 1:9){
   cgroups <- levels(factor(pca_list_com$con_grp))
   df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
 
   sample_means <- aggregate(InfoMeas2_00 ~ Sample, data = df, mean)
   pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+  if (all(sample_means$Sample==pc2_means$Sample)==T){
+    sample_means$PC2 <- pc2_means$PC2
+  }
 
-  #cor <- cor.test(df$Granularity_3, df$PC2)
-  cor <- cor.test(sample_means$InfoMeas2_00, pc2_means$PC2)
+  sample_means <- sample_means[order(sample_means$PC2),]
+ 
+  cols <- all_sample_cols[sample_means$Sample,]
+  cols <- cols[sample_means$Sample,]
+  cols$PC2 <- sample_means$PC2
+  cols <- cols[order(cols$PC2),]
+
+  cor <- cor.test(sample_means$InfoMeas2_00, sample_means$PC2)
   p_value <- cor$p.value %>% round(.,6)
   r <- (cor$estimate) %>% round(., 3)
- # 'D' for darker shades, similar to 'Mako'
-  
-  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+if (p_value < 0.001) {
+  p <- '***'  # Assign '***' for p-values less than 0.001
+} else if (p_value < 0.01) {
+  p <- '**'   # Assign '**' for p-values less than 0.01
+} else {
+  p <- ''     # No asterisks for p-values 0.01 or higher
+}
+
 
   # Create a ggplot
   glist[[c]] <- ggplot() +
-    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = InfoMeas2_00, color=Sample), size=0.3) +
-    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = reorder(Sample, PC2), y = InfoMeas2_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    geom_jitter(data = df, aes(x = Sample, y = InfoMeas2_00, color=Sample), size=0.3) +
     geom_line(data = sample_means, aes(x = Sample, y = InfoMeas2_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
-    scale_color_manual(values=sample_cols) +
+    scale_color_manual(values=colors, breaks = sample_means$Sample) +
     annotate("text", x = Inf, y = Inf, 
-         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
-         hjust = 1.1, vjust = 1.1, size = 6) +
+        label = p, 
+        hjust = 1.1, vjust = 1.1, size = 9, color='red') +
     theme_minimal() +
     theme(
   legend.position = 'right', 
@@ -441,7 +505,7 @@ dev.off()
 
 ### Neurodevelopmental samples
 pca_list_com <- do.call(rbind, pca_list)
-### granularity 3
+### granularity 3### Neurodevelopmental samplesglist <- list()
 glist <- list()
 for (c in 1:9){
   cgroups <- levels(factor(pca_list_com$con_grp))
@@ -449,24 +513,39 @@ for (c in 1:9){
 
   sample_means <- aggregate(InverseDifferenceMoment_00 ~ Sample, data = df, mean)
   pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+  if (all(sample_means$Sample==pc2_means$Sample)==T){
+    sample_means$PC2 <- pc2_means$PC2
+  }
 
-  #cor <- cor.test(df$Granularity_3, df$PC2)
-  cor <- cor.test(sample_means$InverseDifferenceMoment_00, pc2_means$PC2)
+  sample_means <- sample_means[order(sample_means$PC2),]
+ 
+  cols <- all_sample_cols[sample_means$Sample,]
+  cols <- cols[sample_means$Sample,]
+  cols$PC2 <- sample_means$PC2
+  cols <- cols[order(cols$PC2),]
+
+  cor <- cor.test(sample_means$InverseDifferenceMoment_00, sample_means$PC2)
   p_value <- cor$p.value %>% round(.,6)
   r <- (cor$estimate) %>% round(., 3)
- # 'D' for darker shades, similar to 'Mako'
-  
-  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+if (p_value < 0.001) {
+  p <- '***'  # Assign '***' for p-values less than 0.001
+} else if (p_value < 0.01) {
+  p <- '**'   # Assign '**' for p-values less than 0.01
+} else {
+  p <- ''     # No asterisks for p-values 0.01 or higher
+}
+
 
   # Create a ggplot
   glist[[c]] <- ggplot() +
-    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = InverseDifferenceMoment_00, color=Sample), size=0.3) +
-    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = reorder(Sample, PC2), y = InverseDifferenceMoment_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    geom_jitter(data = df, aes(x = Sample, y = InverseDifferenceMoment_00, color=Sample), size=0.3) +
     geom_line(data = sample_means, aes(x = Sample, y = InverseDifferenceMoment_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
-    scale_color_manual(values=sample_cols) +
+    scale_color_manual(values=colors, breaks = sample_means$Sample) +
     annotate("text", x = Inf, y = Inf, 
-         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
-         hjust = 1.1, vjust = 1.1, size = 6) +
+        label = p, 
+        hjust = 1.1, vjust = 1.1, size = 9, color='red') +
     theme_minimal() +
     theme(
   legend.position = 'right', 
@@ -494,64 +573,6 @@ ggarrange(plotlist = glist, nrow = 9)
 dev.off()
 
 
-
-### Neurodevelopmental samples
-pca_list_com <- do.call(rbind, pca_list)
-### granularity 3
-glist <- list()
-for (c in 1:9){
-  cgroups <- levels(factor(pca_list_com$con_grp))
-  df <- pca_list_com[pca_list_com$con_grp == cgroups[c],]
-
-  sample_means <- aggregate(Angular2ndMoment_00 ~ Sample, data = df, mean)
-  pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
-
-  #cor <- cor.test(df$Granularity_3, df$PC2)
-  cor <- cor.test(sample_means$Angular2ndMoment_00, pc2_means$PC2)
-  p_value <- cor$p.value %>% round(.,6)
-  r <- (cor$estimate) %>% round(., 3)
- # 'D' for darker shades, similar to 'Mako'
-  
-  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
-
-  # Create a ggplot
-  glist[[c]] <- ggplot() +
-    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = Angular2ndMoment_00, color=Sample), size=0.3) +
-    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
-    geom_line(data = sample_means, aes(x = Sample, y = Angular2ndMoment_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
-    scale_color_manual(values=sample_cols) +
-    annotate("text", x = Inf, y = Inf, 
-         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
-         hjust = 1.1, vjust = 1.1, size = 6) +
-    theme_minimal() +
-    theme(
-  legend.position = 'right', 
-  legend.text = element_text(size=9),
-  legend.title = element_blank(),
-  legend.spacing.y = unit(0.1, 'cm'),  # Reduced spacing
-  legend.key.height = unit(0.1, 'cm'),  # Smaller keys
-  axis.title = element_blank(),
-  axis.text.x = element_blank(),
-  axis.text.y = element_text(size=12)
-) +   
-    guides(color = guide_legend(override.aes = list(size = 3))) +
-    guides(fill = guide_legend(byrow = TRUE)) +
-
-
-    ylim((min(df$Angular2ndMoment_00)), (max(df$Angular2ndMoment_00)+0.15))
-
-}
-
-
-
-### FIGURE 3B ###
-pdf(paste0(figures_filepath, 'Figure_3/Fig3_B1_Ang2ndMom.pdf'), width = 4.5, height = 18)
-ggarrange(plotlist = glist, nrow = 9)
-dev.off()
-
-
-
-
 ###------------------------------------------------------------------####
 ### Figure 3 - low confluency
 ###------------------------------------------------------------------####
@@ -566,24 +587,39 @@ for (c in 1:9){
 
   sample_means <- aggregate(Correlation_00 ~ Sample, data = df, mean)
   pc2_means <- aggregate(PC2 ~ Sample, data = df, mean)
+  if (all(sample_means$Sample==pc2_means$Sample)==T){
+    sample_means$PC2 <- pc2_means$PC2
+  }
 
-  #cor <- cor.test(df$Granularity_3, df$PC2)
-  cor <- cor.test(sample_means$Correlation_00, pc2_means$PC2)
+  sample_means <- sample_means[order(sample_means$PC2),]
+ 
+  cols <- all_sample_cols[sample_means$Sample,]
+  cols <- cols[sample_means$Sample,]
+  cols$PC2 <- sample_means$PC2
+  cols <- cols[order(cols$PC2),]
+
+  cor <- cor.test(sample_means$Correlation_00, sample_means$PC2)
   p_value <- cor$p.value %>% round(.,6)
   r <- (cor$estimate) %>% round(., 3)
- # 'D' for darker shades, similar to 'Mako'
-  
-  colors = sequential_hcl('ag_Sunset', n=nrow(sample_means))
+
+if (p_value < 0.001) {
+  p <- '***'  # Assign '***' for p-values less than 0.001
+} else if (p_value < 0.01) {
+  p <- '**'   # Assign '**' for p-values less than 0.01
+} else {
+  p <- ''     # No asterisks for p-values 0.01 or higher
+}
+
 
   # Create a ggplot
   glist[[c]] <- ggplot() +
-    geom_jitter(data = df, aes(x = reorder(Sample, PC2), y = Correlation_00, color=Sample), size=0.3) +
-    #geom_point(data = sample_means, aes(x = Sample, y = Granularity_3), color = cols_neutral[c], size = 2) +
+    geom_line(data = sample_means, aes(x = reorder(Sample, PC2), y = Correlation_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
+    geom_jitter(data = df, aes(x = Sample, y = Correlation_00, color=Sample), size=0.3) +
     geom_line(data = sample_means, aes(x = Sample, y = Correlation_00, group=1), color = 'black', size = 0.9) +  # Line connecting means
-    scale_color_manual(values=sample_cols) +
+    scale_color_manual(values=colors, breaks = sample_means$Sample) +
     annotate("text", x = Inf, y = Inf, 
-         label = paste(sprintf("cor = %.2f,", r), "p =", formatC(p_value, format = "e", digits = 2)), 
-         hjust = 1.1, vjust = 1.1, size = 6) +
+        label = p, 
+        hjust = 1.1, vjust = 1.1, size = 9, color='red') +
     theme_minimal() +
     theme(
   legend.position = 'right', 
